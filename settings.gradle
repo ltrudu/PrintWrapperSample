@@ -1,0 +1,3 @@
+include ':PrintWrapper'
+include ':PrintWrapperSampleApp'
+rootProject.name = "PrintWrapperSample"
