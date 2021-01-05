@@ -88,7 +88,7 @@ public class DirectIPNetworkPrinterDiscovery {
                 NetworkDiscoverer.directedBroadcast(discoveryHandler, printerIP, waitForResponsesTimeout);
             }
         } catch (DiscoveryException e) {
-            Log.i(TAG, "Discovery error");
+            Log.i(TAG, "Discovery error:" + e.getLocalizedMessage());
             if(callback != null)
             {
                 callback.onDiscoveryFailed(e.getMessage());

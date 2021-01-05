@@ -20,20 +20,6 @@ import java.util.Map;
 
 public class ConnectToTCPPrinterTask extends AsyncTask<Void, Boolean, Boolean> {
 
-    public interface SelectedPrinterTaskCallbacks
-    {
-        void onSuccess(DiscoveredPrinter printer);
-        void onError(SelectedPrinterTaskError error, String errorMessage);
-    }
-
-    public enum SelectedPrinterTaskError
-    {
-        DEVICE_DISCONNECT_ERROR,
-        WRONG_FIRMWARE,
-        OPEN_CONNECTION_ERROR,
-        RESET_CONNECTION
-    }
-
     private static final String TAG = "CONNECT_TCP_TASK";
 
     private Context context;
@@ -103,7 +89,7 @@ public class ConnectToTCPPrinterTask extends AsyncTask<Void, Boolean, Boolean> {
             };
 
             Map<String, String> discoveryMap = selectedPrinter.getDiscoveryDataMap();
-            discoveryMap.put("PDF_ENABLED", isPDFEnabled(connection) ? "true" : "false");
+            discoveryMap.put(DiscoveryDataMapKeys.PDF_ENABLED, isPDFEnabled(connection) ? "true" : "false");
 
             result = true;
 

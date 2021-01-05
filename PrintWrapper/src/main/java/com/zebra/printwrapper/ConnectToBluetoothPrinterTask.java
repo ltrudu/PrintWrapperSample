@@ -18,20 +18,6 @@ import java.util.Map;
 
 public class ConnectToBluetoothPrinterTask extends AsyncTask<Void, Boolean, Boolean> {
 
-    public interface SelectedPrinterTaskCallbacks
-    {
-        void onSuccess(DiscoveredPrinter printer);
-        void onError(SelectedPrinterTaskError error, String errorMessage);
-    }
-
-    public enum SelectedPrinterTaskError
-    {
-        DEVICE_DISCONNECT_ERROR,
-        WRONG_FIRMWARE,
-        OPEN_CONNECTION_ERROR,
-        RESET_CONNECTION
-    }
-
     private static final String TAG = "CONNECT_BT_TASK";
 
     private Context context;
@@ -101,13 +87,13 @@ public class ConnectToBluetoothPrinterTask extends AsyncTask<Void, Boolean, Bool
 
             // Add some information that are not reported by the bluetooth discoverer
             Map<String, String> discoveryMap = selectedPrinter.getDiscoveryDataMap();
-            discoveryMap.put("LINK_OS_MAJOR_VER", SGD.GET("appl.link_os_version", connection));
-            discoveryMap.put("PRODUCT_NAME", SGD.GET("device.product_name", connection));
-            discoveryMap.put("SYSTEM_NAME", SGD.GET("bluetooth.friendly_name", connection));
-            discoveryMap.put("HARDWARE_ADDRESS", SGD.GET("bluetooth.address", connection));
-            discoveryMap.put("FIRMWARE_VER", SGD.GET("appl.name", connection));
-            discoveryMap.put("SERIAL_NUMBER", SGD.GET("device.unique_id", connection));
-            discoveryMap.put("PDF_ENABLED", isPDFEnabled(connection) ? "true" : "false");
+            discoveryMap.put(DiscoveryDataMapKeys.LINK_OS_MAJOR_VER, SGD.GET("appl.link_os_version", connection));
+            discoveryMap.put(DiscoveryDataMapKeys.PRODUCT_NAME, SGD.GET("device.product_name", connection));
+            discoveryMap.put(DiscoveryDataMapKeys.SYSTEM_NAME, SGD.GET("bluetooth.friendly_name", connection));
+            discoveryMap.put(DiscoveryDataMapKeys.HARDWARE_ADDRESS, SGD.GET("bluetooth.address", connection));
+            discoveryMap.put(DiscoveryDataMapKeys.FIRMWARE_VER, SGD.GET("appl.name", connection));
+            discoveryMap.put(DiscoveryDataMapKeys.SERIAL_NUMBER, SGD.GET("device.unique_id", connection));
+            discoveryMap.put(DiscoveryDataMapKeys.PDF_ENABLED, isPDFEnabled(connection) ? "true" : "false");
 
             result = true;
 
