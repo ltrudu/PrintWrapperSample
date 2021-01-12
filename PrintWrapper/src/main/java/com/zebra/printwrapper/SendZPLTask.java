@@ -8,47 +8,45 @@ import com.zebra.sdk.comm.Connection;
 import com.zebra.sdk.comm.ConnectionException;
 import com.zebra.sdk.comm.TcpConnection;
 import com.zebra.sdk.device.ProgressMonitor;
+import com.zebra.sdk.printer.PrinterLanguage;
 import com.zebra.sdk.printer.PrinterStatus;
+import com.zebra.sdk.printer.SGD;
 import com.zebra.sdk.printer.ZebraPrinter;
 import com.zebra.sdk.printer.ZebraPrinterFactory;
 import com.zebra.sdk.printer.ZebraPrinterLanguageUnknownException;
 import com.zebra.sdk.printer.discovery.DiscoveredPrinter;
 
-public class SendFileTask extends AsyncTask<Void, Boolean, Boolean> {
+public class SendZPLTask extends AsyncTask<Void, Boolean, Boolean> {
 
-    public enum SendFileTaskErrors
+    public enum SendZPLTaskErrors
     {
         NO_PRINTER,
-        EMPTY_FILE_PATH,
+        EMPTY_ZPL_STRING,
         PRINTER_PAUSED,
         HEAD_OPEN,
         PAPER_OUT,
         UNKNOWN_PRINTER_STATUS,
         CONNECTION_ERROR,
-        PRINTER_LANGUAGE_UNKNOWN
+        PRINTER_LANGUAGE_UNKNOWN,
+        ERROR_CPCL_PRINTER,
+        ERROR_LINEPRINT_PRINTER
     }
 
-    public interface SendFileTaskCallback
+    public interface SendZPLTaskCallback
     {
-        void onError(SendFileTaskErrors error, String message);
-        void onPrintProgress(String fileName, int progress, int bytesWritten, int totalBytes);
+        void onError(SendZPLTaskErrors error, String message);
         void onSuccess();
     }
 
 
-    private static final String TAG = "SEND_PDF_TASK";
+    private static final String TAG = "SEND_ZPL_TASK";
     private DiscoveredPrinter printer;
-    private String filePath;
-    private SendFileTaskCallback callback = null;
+    private String zplString;
+    private SendZPLTaskCallback callback = null;
 
-    /**
-     *
-     * @param filePath
-     * @param printer
-     */
-    public SendFileTask(String filePath, DiscoveredPrinter printer, SendFileTaskCallback callback) {
+    public SendZPLTask(String zplString, DiscoveredPrinter printer, SendZPLTaskCallback callback) {
         this.printer = printer;
-        this.filePath = filePath;
+        this.zplString = zplString;
         this.callback = callback;
     }
 
@@ -58,15 +56,14 @@ public class SendFileTask extends AsyncTask<Void, Boolean, Boolean> {
         return null;
     }
 
-    // Sets the scaling on the printer and then sends the pdf file to the printer
     private void sendPrint() {
         Log.i(TAG, "sendPrint()");
 
-        if (filePath == null)
+        if (zplString == null)
         {
             if(callback != null)
             {
-                callback.onError(SendFileTaskErrors.EMPTY_FILE_PATH, "Empty PDF file path");
+                callback.onError(SendZPLTaskErrors.EMPTY_ZPL_STRING, "Empty ZPL string");
             }
             return;
         }
@@ -89,7 +86,7 @@ public class SendFileTask extends AsyncTask<Void, Boolean, Boolean> {
             {
                 if(callback != null)
                 {
-                    callback.onError(SendFileTaskErrors.NO_PRINTER, "No printer found");
+                    callback.onError(SendZPLTaskErrors.NO_PRINTER, "No printer found");
                 }
                 return;
             }
@@ -101,7 +98,7 @@ public class SendFileTask extends AsyncTask<Void, Boolean, Boolean> {
                 if (printerStatus.isPaused) {
                     if(callback != null)
                     {
-                        callback.onError(SendFileTaskErrors.PRINTER_PAUSED, "Printer is paused");
+                        callback.onError(SendZPLTaskErrors.PRINTER_PAUSED, "Printer is paused");
                     }
                     return;
                     }
@@ -109,14 +106,14 @@ public class SendFileTask extends AsyncTask<Void, Boolean, Boolean> {
                 {
                     if(callback != null)
                     {
-                        callback.onError(SendFileTaskErrors.HEAD_OPEN, "Printer's head is open");
+                        callback.onError(SendZPLTaskErrors.HEAD_OPEN, "Printer's head is open");
                     }
                     return;
                 } else if (printerStatus.isPaperOut)
                 {
                     if(callback != null)
                     {
-                        callback.onError(SendFileTaskErrors.PAPER_OUT, "Paper is out");
+                        callback.onError(SendZPLTaskErrors.PAPER_OUT, "Paper is out");
                     }
                     return;
                 }
@@ -124,37 +121,34 @@ public class SendFileTask extends AsyncTask<Void, Boolean, Boolean> {
                 {
                     if(callback != null)
                     {
-                        callback.onError(SendFileTaskErrors.UNKNOWN_PRINTER_STATUS, "Unknown printer status");
+                        callback.onError(SendZPLTaskErrors.UNKNOWN_PRINTER_STATUS, "Unknown printer status");
                     }
                     return;
                 }
             }
 
-            printer.sendFileContents(filePath, new ProgressMonitor() {
-                @Override
-                public void updateProgress(int bytesWritten, int totalBytes) {
-                    // Calc Progress
-                    double rawProgress = bytesWritten * 100 / totalBytes;
-                    int progress = (int) Math.round(rawProgress);
-
-                    // Notify progress
-                    if(callback != null)
-                    {
-                        callback.onPrintProgress(filePath, progress, bytesWritten, totalBytes);
-                    }
+            PrinterLanguage pl = printer.getPrinterControlLanguage();
+            if (pl != PrinterLanguage.ZPL) {
+                if(callback != null)
+                {
+                    callback.onError(pl == PrinterLanguage.CPCL ? SendZPLTaskErrors.ERROR_CPCL_PRINTER : SendZPLTaskErrors.ERROR_LINEPRINT_PRINTER, "Can't send ZPL content to a " + (pl == PrinterLanguage.CPCL ? "CPCL" : "LINEPRINT") + " printer.");
                 }
-            });
+                return;
+            }
+
+            byte[] zplBytes = zplString.getBytes();
+            connection.write(zplBytes);
         } catch (ConnectionException e) {
             e.printStackTrace();
             if(callback != null)
             {
-                callback.onError(SendFileTaskErrors.CONNECTION_ERROR, e.getLocalizedMessage());
+                callback.onError(SendZPLTaskErrors.CONNECTION_ERROR, e.getLocalizedMessage());
             }
         } catch (ZebraPrinterLanguageUnknownException e) {
             e.printStackTrace();
             if(callback != null)
             {
-                callback.onError(SendFileTaskErrors.PRINTER_LANGUAGE_UNKNOWN, e.getLocalizedMessage());
+                callback.onError(SendZPLTaskErrors.PRINTER_LANGUAGE_UNKNOWN, e.getLocalizedMessage());
             }
         } finally {
             try {

@@ -67,4 +67,7 @@ public class DiscoveryDataMapKeys {
 
     // Additional info
     public static final String PDF_ENABLED  = "PDF_ENABLED";
+    public static final String CONNEXION_TYPE = "CONNEXION_TYPE";
+    public static final String CONNEXION_TYPE_BLUETOOTH = "CONNEXION_TYPE_BLUETOOTH";
+    public static final String CONNEXION_TYPE_NETWORK = "CONNEXION_TYPE_NETWORK";
 }

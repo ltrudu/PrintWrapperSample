@@ -20,7 +20,7 @@ public class DirectIPNetworkPrinterDiscovery {
     private String printerIP;
     private int waitForResponsesTimeout = -1;
 
-    public DirectIPNetworkPrinterDiscovery(String printerIP, Context context, PrinterDiscoveryCallback callback)
+    public DirectIPNetworkPrinterDiscovery(Context context, String printerIP, PrinterDiscoveryCallback callback)
     {
         this.context = context;
         this.callback = callback;
@@ -28,7 +28,7 @@ public class DirectIPNetworkPrinterDiscovery {
         waitForResponsesTimeout = -1;
     }
 
-    public DirectIPNetworkPrinterDiscovery(String printerIP, int waitForResponsesTimeout, Context context, PrinterDiscoveryCallback callback)
+    public DirectIPNetworkPrinterDiscovery(Context context, String printerIP, int waitForResponsesTimeout, PrinterDiscoveryCallback callback)
     {
         this.context = context;
         this.callback = callback;

@@ -90,7 +90,7 @@ public class ConnectToTCPPrinterTask extends AsyncTask<Void, Boolean, Boolean> {
 
             Map<String, String> discoveryMap = selectedPrinter.getDiscoveryDataMap();
             discoveryMap.put(DiscoveryDataMapKeys.PDF_ENABLED, isPDFEnabled(connection) ? "true" : "false");
-
+            discoveryMap.put(DiscoveryDataMapKeys.CONNEXION_TYPE, DiscoveryDataMapKeys.CONNEXION_TYPE_NETWORK);
             result = true;
 
             connection.close();

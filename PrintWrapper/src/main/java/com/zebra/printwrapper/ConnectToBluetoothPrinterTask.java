@@ -94,6 +94,7 @@ public class ConnectToBluetoothPrinterTask extends AsyncTask<Void, Boolean, Bool
             discoveryMap.put(DiscoveryDataMapKeys.FIRMWARE_VER, SGD.GET("appl.name", connection));
             discoveryMap.put(DiscoveryDataMapKeys.SERIAL_NUMBER, SGD.GET("device.unique_id", connection));
             discoveryMap.put(DiscoveryDataMapKeys.PDF_ENABLED, isPDFEnabled(connection) ? "true" : "false");
+            discoveryMap.put(DiscoveryDataMapKeys.CONNEXION_TYPE, DiscoveryDataMapKeys.CONNEXION_TYPE_BLUETOOTH);
 
             result = true;
 

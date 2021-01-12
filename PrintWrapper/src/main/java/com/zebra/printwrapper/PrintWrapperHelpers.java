@@ -41,4 +41,14 @@ public class PrintWrapperHelpers {
         return Integer.parseInt(discoveryDataMap.get(DiscoveryDataMapKeys.PORT_NUMBER));
     }
 
+    /**
+     * Get printer primary language CPCL or ZPL
+     * @param printer
+     * @return Primary language of the printer
+     */
+    public static String getPrinterPrimaryLanguage(DiscoveredPrinter printer)
+    {
+        Map<String, String> discoveryDataMap = printer.getDiscoveryDataMap();
+        return discoveryDataMap.get(DiscoveryDataMapKeys.PRIMARY_LANGUAGE);
+    }
 }

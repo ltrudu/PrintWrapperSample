@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
                 Map<String, String> discoveryDataMap = printer.getDiscoveryDataMap();
                 String friendlyName = discoveryDataMap.get(DiscoveryDataMapKeys.FRIENDLY_NAME);
                 String address = printer.address;
+
                 mymap.put(address, printer);
                 Log.d(TAG, "PrinterDiscovered:" + address + " : " + friendlyName);
             }
@@ -188,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendPDF()
     {
-        DirectIPNetworkPrinterDiscovery discovery = new DirectIPNetworkPrinterDiscovery("192.168.1.36", this, new PrinterDiscoveryCallback() {
+        DirectIPNetworkPrinterDiscovery discovery = new DirectIPNetworkPrinterDiscovery(this, "192.168.1.36", new PrinterDiscoveryCallback() {
             @Override
             public void onPrinterDiscovered(DiscoveredPrinter printer) {
                 Log.d("PrintWrapper", "discovered:" + printer.address);
