@@ -2,11 +2,12 @@ package com.zebra.printwrapper;
 
 import com.zebra.sdk.printer.SGD;
 
-public class DiscoveryDataMapKeys {
+public class PrinterDiscoveryDataMapKeys {
     // Network printer Keys
     public static final String ACTIVE_NETWORK_INTERFACE   = "ACTIVE_NETWORK_INTERFACE";
     public static final String ADDRESS   = "ADDRESS";
     public static final String ADVANCED_DISCOVERY_VER   = "ADVANCED_DISCOVERY_VER";
+    public static final String APL_MODE   = "APL_MODE";
     public static final String AVAILABLE_INTERFACES   = "AVAILABLE_INTERFACES";
     public static final String AVAILABLE_LANGUAGES  = "AVAILABLE_LANGUAGES";
     public static final String AVAILABLE_NETWORK_PROTOCOLS   = "AVAILABLE_NETWORK_PROTOCOLS";

@@ -13,7 +13,7 @@ import com.zebra.printwrapper.BluetoothPrinterDiscovery;
 import com.zebra.printwrapper.ConnectToBluetoothPrinterTask;
 import com.zebra.printwrapper.ConnectToTCPPrinterTask;
 import com.zebra.printwrapper.DirectIPNetworkPrinterDiscovery;
-import com.zebra.printwrapper.DiscoveryDataMapKeys;
+import com.zebra.printwrapper.PrinterDiscoveryDataMapKeys;
 import com.zebra.printwrapper.LocalNetworkPrinterDiscovery;
 import com.zebra.printwrapper.PrinterDiscoveryCallback;
 import com.zebra.printwrapper.SelectedPrinterTaskCallbacks;
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPrinterDiscovered(DiscoveredPrinter printer) {
                 Map<String, String> discoveryDataMap = printer.getDiscoveryDataMap();
-                String friendlyName = discoveryDataMap.get(DiscoveryDataMapKeys.FRIENDLY_NAME);
+                String friendlyName = discoveryDataMap.get(PrinterDiscoveryDataMapKeys.FRIENDLY_NAME);
                 String address = printer.address;
                 mymap.put(address, printer);
             }
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPrinterDiscovered(DiscoveredPrinter printer) {
                 Map<String, String> discoveryDataMap = printer.getDiscoveryDataMap();
-                String friendlyName = discoveryDataMap.get(DiscoveryDataMapKeys.FRIENDLY_NAME);
+                String friendlyName = discoveryDataMap.get(PrinterDiscoveryDataMapKeys.FRIENDLY_NAME);
                 String address = printer.address;
 
                 mymap.put(address, printer);

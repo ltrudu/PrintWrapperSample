@@ -38,7 +38,7 @@ public class PrintWrapperHelpers {
         if(isBluetoothPrinter(printer))
             return -1;
         Map<String, String> discoveryDataMap = printer.getDiscoveryDataMap();
-        return Integer.parseInt(discoveryDataMap.get(DiscoveryDataMapKeys.PORT_NUMBER));
+        return Integer.parseInt(discoveryDataMap.get(PrinterDiscoveryDataMapKeys.PORT_NUMBER));
     }
 
     /**
@@ -49,6 +49,6 @@ public class PrintWrapperHelpers {
     public static String getPrinterPrimaryLanguage(DiscoveredPrinter printer)
     {
         Map<String, String> discoveryDataMap = printer.getDiscoveryDataMap();
-        return discoveryDataMap.get(DiscoveryDataMapKeys.PRIMARY_LANGUAGE);
+        return discoveryDataMap.get(PrinterDiscoveryDataMapKeys.PRIMARY_LANGUAGE);
     }
 }
