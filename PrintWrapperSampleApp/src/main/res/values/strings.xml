@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PrintWrapperSample</string>
+    <string name="bt_window_name">Bluetooth connexion</string>
 </resources>
