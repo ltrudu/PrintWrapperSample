@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,7 +41,7 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-public class MainActivity extends AppCompatActivity {
+public class BTConnectActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_REQUEST = 0;
     private static final String[] PERMISSIONS = {
@@ -68,28 +70,31 @@ public class MainActivity extends AppCompatActivity {
     private EditText et_macaddress;
     private EditText etZpl_to_send;
 
-    private final String ms_zpltoSend = "^XA\n" +
+    private final String m_defaultZpltoSend = "^XA\n" +
             "^LH55,30\n" +
             "^FO20,10^CFD,27,13^FDZebra Technologies^FS\n" +
             "^FO20,60^AD^FDExemple Etiquette^FS\n" +
             "^FO40,160^BY2,2.0^BCN,100,Y,N,N,N^FD<PART,-1>^FS\n" +
             "^XZ";
 
+    private final String m_defaultMacAddress = "AC3FA4CE7931";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setTitle(R.string.bt_window_name);
+
         et_results = (TextView)findViewById(R.id.et_results);
         sv_results = (ScrollView)findViewById(R.id.sv_results);
         et_macaddress = (EditText)findViewById(R.id.et_macaddress);
         etZpl_to_send = (EditText)findViewById(R.id.et_zpl);
-        etZpl_to_send.setText(ms_zpltoSend);
 
         // Verify Permissions
         if (!permissionsGranted()) {
             // Request Permissions
-            ActivityCompat.requestPermissions(MainActivity.this, PERMISSIONS, PERMISSIONS_REQUEST);
+            ActivityCompat.requestPermissions(BTConnectActivity.this, PERMISSIONS, PERMISSIONS_REQUEST);
         }
         else
             requestBTPermissions();
@@ -107,28 +112,51 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String zpltoSend = etZpl_to_send.getText().toString();
-                if(zpltoSend.isEmpty())
-                    zpltoSend = ms_zpltoSend;
-                new SendZPLTask(zpltoSend, selectedPrinter, new SendZPLTask.SendZPLTaskCallback() {
-                    @Override
-                    public void onError(SendZPLTask.SendZPLTaskErrors error, String message) {
+                if (zpltoSend.isEmpty()) {
+                    zpltoSend = m_defaultZpltoSend;
+                    etZpl_to_send.setText(m_defaultZpltoSend);
+                }
 
-                    }
+                if (selectedPrinter != null && selectedPrinter.getConnection() != null) {
 
-                    @Override
-                    public void onSuccess() {
+                    new SendZPLTask(zpltoSend, selectedPrinter, new SendZPLTask.SendZPLTaskCallback() {
+                        @Override
+                        public void onError(SendZPLTask.SendZPLTaskErrors error, String message) {
+                            addLineToResults("Error while sending ZPL to printer: " + error.toString());
+                            addLineToResults("Error message: message");
+                        }
 
-                    }
-                }).execute();
+                        @Override
+                        public void onSuccess() {
+                            addLineToResults("ZPL sent with success to printer.");
+                        }
+                    }).execute();
+                }
+                else
+                {
+                    addLineToResults("Please connect to a printer before sending ZPL");
+                }
+            }
+
+        });
+
+        findViewById(R.id.button_writesettings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                writeToSettings();
             }
         });
 
+        if(mScrollDownHandler == null)
+            mScrollDownHandler = new Handler(Looper.getMainLooper());
+        getFromSettings();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mScrollDownHandler = new Handler(Looper.getMainLooper());
+        if(mScrollDownHandler == null)
+            mScrollDownHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
@@ -140,6 +168,45 @@ public class MainActivity extends AppCompatActivity {
             mScrollDownHandler = null;
         }
         super.onPause();
+    }
+
+    private void getFromSettings()
+    {
+        addLineToResults("Getting data from settings.");
+        SharedPreferences sharedpreferences = this.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String macAddress = sharedpreferences.getString(Constants.SHARED_PREFERENCES_MACADDRESS, null);
+        String zplToSend = sharedpreferences.getString(Constants.SHARED_PREFERENCES_ZPL, null);
+
+        if(macAddress == null || macAddress.isEmpty())
+        {
+            addLineToResults("No settings for MacAddress, using default.");
+            macAddress = m_defaultMacAddress;
+        }
+
+        if(zplToSend == null || zplToSend.isEmpty())
+        {
+            addLineToResults("No settings for ZPL, using default.");
+            zplToSend = m_defaultZpltoSend;
+        }
+
+        et_macaddress.setText(macAddress);
+        etZpl_to_send.setText(zplToSend);
+        addLineToResults("Settings read successfully");
+    }
+
+    private void writeToSettings()
+    {
+        SharedPreferences sharedpreferences = this.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        String macAddress = et_macaddress.getText().toString();
+        if(macAddress.isEmpty())
+            macAddress = m_defaultMacAddress;
+        String zplToSend = etZpl_to_send.getText().toString();
+        if(zplToSend.isEmpty())
+            zplToSend = m_defaultZpltoSend;
+        editor.putString(Constants.SHARED_PREFERENCES_MACADDRESS, macAddress);
+        editor.putString(Constants.SHARED_PREFERENCES_ZPL, zplToSend);
+        editor.commit();
     }
 
     private void addLineToResults(final String lineToAdd)
@@ -154,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
             mScrollDownRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    MainActivity.this.runOnUiThread(new Runnable() {
+                    BTConnectActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             et_results.setText(mResults);

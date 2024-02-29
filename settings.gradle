@@ -1,3 +1,20 @@
-include ':PrintWrapper'
-include ':PrintWrapperSampleApp'
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+include ':PrintWrapperSampleApp'//,':PrintWrapper'
 rootProject.name = "PrintWrapperSample"
