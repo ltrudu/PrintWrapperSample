@@ -20,11 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zebra.printwrapper.BluetoothPrinterDiscovery;
-import com.zebra.printwrapper.ConnectToBluetoothPrinterTask;
 import com.zebra.printwrapper.PrinterDiscoveryDataMapKeys;
 import com.zebra.printwrapper.PrinterDiscoveryCallback;
-import com.zebra.printwrapper.SelectedPrinterTaskCallbacks;
-import com.zebra.printwrapper.SelectedPrinterTaskError;
 
 import com.zebra.printwrapper.SendZPLTask;
 import com.zebra.sdk.printer.discovery.DiscoveredPrinter;
@@ -63,12 +60,14 @@ public class BTConnectActivity extends AppCompatActivity {
     private Handler mScrollDownHandler = null;
     private Runnable mScrollDownRunnable = null;
 
-    private TextView et_results;
+    private TextView tv_results;
     private ScrollView sv_results;
     private String mResults = "";
 
     private EditText et_macaddress;
     private EditText etZpl_to_send;
+
+    private SendZPLTask sendZPLTask = null;
 
     private final String m_defaultZpltoSend = "^XA\n" +
             "^LH55,30\n" +
@@ -86,7 +85,7 @@ public class BTConnectActivity extends AppCompatActivity {
 
         setTitle(R.string.bt_window_name);
 
-        et_results = (TextView)findViewById(R.id.et_results);
+        tv_results = (TextView)findViewById(R.id.tv_results);
         sv_results = (ScrollView)findViewById(R.id.sv_results);
         et_macaddress = (EditText)findViewById(R.id.et_macaddress);
         etZpl_to_send = (EditText)findViewById(R.id.et_zpl);
@@ -117,28 +116,38 @@ public class BTConnectActivity extends AppCompatActivity {
                     etZpl_to_send.setText(m_defaultZpltoSend);
                 }
 
-                if (selectedPrinter != null && selectedPrinter.getConnection() != null) {
+                if (selectedPrinter != null) {
 
-                    new SendZPLTask(zpltoSend, selectedPrinter, new SendZPLTask.SendZPLTaskCallback() {
-                        @Override
-                        public void onError(SendZPLTask.SendZPLTaskErrors error, String message) {
-                            addLineToResults("Error while sending ZPL to printer: " + error.toString());
-                            addLineToResults("Error message: message");
-                        }
+                    if(sendZPLTask == null) {
+                        addLineToResults("Sending ZPL to printer.");
 
-                        @Override
-                        public void onSuccess() {
-                            addLineToResults("ZPL sent with success to printer.");
+                        sendZPLTask = new SendZPLTask(zpltoSend, selectedPrinter, new SendZPLTask.SendZPLTaskCallback() {
+                            @Override
+                            public void onError(SendZPLTask.SendZPLTaskErrors error, String message) {
+                                addLineToResults("Error while sending ZPL to printer: " + error.toString());
+                                addLineToResults("Error message: message");
+                                sendZPLTask = null;
+                            }
+
+                            @Override
+                            public void onSuccess() {
+                                addLineToResults("ZPL sent with success to printer.");
+                                sendZPLTask = null;
+                            }
+                        });
+                        sendZPLTask.executeAsync();
                         }
-                    }).execute();
-                }
-                else
-                {
+                    else {
+                        addLineToResults("A Send ZPL Task is already running, wait for it to finish.");
+                    }
+                    }
+                    else {
                     addLineToResults("Please connect to a printer before sending ZPL");
                 }
             }
 
         });
+
 
         findViewById(R.id.button_writesettings).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -216,6 +225,13 @@ public class BTConnectActivity extends AppCompatActivity {
         updateAndScrollDownTextView();
     }
 
+    private void addToResultWitoutRC(final String charsToAdd)
+    {
+        Log.d(TAG, charsToAdd);
+        mResults += charsToAdd;
+        updateAndScrollDownTextView();
+    }
+
     private void updateAndScrollDownTextView() {
         if (mScrollDownRunnable == null) {
             mScrollDownRunnable = new Runnable() {
@@ -224,7 +240,7 @@ public class BTConnectActivity extends AppCompatActivity {
                     BTConnectActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            et_results.setText(mResults);
+                            tv_results.setText(mResults);
                             sv_results.post(new Runnable() {
                                 @Override
                                 public void run() {
@@ -244,28 +260,13 @@ public class BTConnectActivity extends AppCompatActivity {
             mScrollDownHandler.postDelayed(mScrollDownRunnable, 300);
     }
 
-
-    private void doDemoStuffs()
-    {
-        discoverBluetoothPrinters();
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        if(selectedPrinter != null)
-        {
-            connectToPrinterBluetooth(selectedPrinter);
-        }
-
-    }
-
-
     private void discoverBluetoothPrinters()
     {
+        addLineToResults("**********************************");
         addLineToResults("Starting bluetooth discovery to find requested printer.");
         final Map<String, DiscoveredPrinter> mymap = new HashMap<>();
-        final String macAddress = getCleanedMacAddress(et_macaddress.getText().toString());
+        final String editMacAddress = et_macaddress.getText().toString();
+        final String macAddress = getCleanedMacAddress(editMacAddress);
         PrinterDiscoveryCallback printerDiscoveryCallback = new PrinterDiscoveryCallback() {
             @Override
             public void onPrinterDiscovered(DiscoveredPrinter printer) {
@@ -278,11 +279,13 @@ public class BTConnectActivity extends AppCompatActivity {
 
                 if(address.equalsIgnoreCase(macAddress))
                 {
-                    addLineToResults("Found printer with address:" + macAddress);
+                    addLineToResults("Found printer with address:" + editMacAddress);
                     addLineToResults("Selecting printer for demo.");
                     selectedPrinter = printer;
                     selectedPrinterDiscoveryMap = discoveryDataMap;
-                    connectToPrinterBluetooth(selectedPrinter);
+                    addLineToResults("You are not forced to wait for discovery to finish.");
+                    addLineToResults("You can send ZPL to the printer right now.");
+                    addLineToResults("Waiting for discovery to finish.");
                 }
             }
 
@@ -294,7 +297,12 @@ public class BTConnectActivity extends AppCompatActivity {
                 }
                 else
                 {
+                    addLineToResults("Discovery ended.");
                     addLineToResults("Found:" + mymap.size() + " printers.");
+                }
+                addLineToResults("**********************************");
+                if(selectedPrinter != null) {
+                    addLineToResults("Requested printer was found:" + editMacAddress);
                 }
             }
 
@@ -305,26 +313,6 @@ public class BTConnectActivity extends AppCompatActivity {
         };
         BluetoothPrinterDiscovery bluetoothPrinterDiscovery = new BluetoothPrinterDiscovery(this, printerDiscoveryCallback);
         bluetoothPrinterDiscovery.startDiscovery();
-    }
-
-    private void connectToPrinterBluetooth(DiscoveredPrinter selectedPrinter)
-    {
-        addLineToResults("Connecting to printer:" + selectedPrinter.address);
-        SelectedPrinterTaskCallbacks selectedPrinterTaskCallbacks = new SelectedPrinterTaskCallbacks() {
-            @Override
-            public void onSuccess(DiscoveredPrinter printer, Map<String, String> printerDiscoveryMap) {
-                addLineToResults("Successfully connected to printer: " + selectedPrinter.address);
-            }
-
-            @Override
-            public void onError(SelectedPrinterTaskError error, String errorMessage) {
-                addLineToResults("Error while trying to connect to printer:" + selectedPrinter.address);
-                addLineToResults("Error:" + error.toString());
-                addLineToResults("Error message:" + errorMessage);
-            }
-        };
-        new ConnectToBluetoothPrinterTask(selectedPrinter, selectedPrinterTaskCallbacks, this).execute();
-
     }
 
     /**

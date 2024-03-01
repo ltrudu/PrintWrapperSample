@@ -135,20 +135,21 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@android:color/darker_gray"/>
-    <ScrollView
-        android:id="@+id/sv_results"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.5"
-        android:layout_alignParentStart="true">
 
-        <TextView
-            android:id="@+id/et_results"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/ll_scan"
-            android:inputType="textMultiLine" />
-    </ScrollView>
+        <ScrollView
+            android:id="@+id/sv_results"
+            android:layout_width="fill_parent"
+            android:layout_height="200sp"
+            android:layout_alignParentStart="true"
+            android:layout_weight="0.5">
+
+            <TextView
+                android:id="@+id/tv_results"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/ll_scan"
+                android:inputType="textMultiLine" />
+        </ScrollView>
     </LinearLayout>
     </ScrollView>
 </RelativeLayout>
