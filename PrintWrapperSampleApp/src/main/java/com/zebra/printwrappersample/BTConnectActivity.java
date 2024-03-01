@@ -156,6 +156,13 @@ public class BTConnectActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.button_readsettings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFromSettings();
+            }
+        });
+
         if(mScrollDownHandler == null)
             mScrollDownHandler = new Handler(Looper.getMainLooper());
         getFromSettings();

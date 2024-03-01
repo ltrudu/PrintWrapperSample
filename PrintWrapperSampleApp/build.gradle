@@ -12,8 +12,8 @@ android {
         applicationId "com.zebra.printwrappersample"
         minSdkVersion 30
         targetSdkVersion 33
-        versionCode 2
-        versionName "1.3"
+        versionCode 4
+        versionName "1.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -39,7 +39,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     // Copy paste in your build.gradle
-    implementation 'com.github.ltrudu:PrintWrapper:V1.3'
+    implementation 'com.github.ltrudu:PrintWrapper:V1.4'
     // For dev only
     //implementation project(path: ':PrintWrapper')
 

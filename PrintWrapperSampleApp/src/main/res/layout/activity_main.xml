@@ -39,6 +39,16 @@
             android:visibility="visible" />
 
             <Button
+                android:id="@+id/button_readsettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Read\nSettings"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+
+            <Button
                 android:id="@+id/button_writesettings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
