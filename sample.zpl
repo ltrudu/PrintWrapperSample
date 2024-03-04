@@ -1,0 +1,6 @@
+^XA
+^LH55,30
+^FO20,10^CFD,27,13^FDZebra Technologies^FS
+^FO20,60^AD^FDPrintWrapper Sample^FS
+^FO40,160^BY2,2.0^BCN,100,Y,N,N,N^FD<PART,-1>^FS
+^XZ

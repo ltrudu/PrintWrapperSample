@@ -1,13 +1,17 @@
 package com.zebra.printwrappersample;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +30,11 @@ import com.zebra.printwrapper.PrinterDiscoveryCallback;
 import com.zebra.printwrapper.SendZPLTask;
 import com.zebra.sdk.printer.discovery.DiscoveredPrinter;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,13 +50,12 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 public class BTConnectActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_REQUEST = 0;
+    private static final int OPEN_FILE_REQUEST_CODE = 54561;
     private static final String[] PERMISSIONS = {
             ACCESS_FINE_LOCATION,
-            WRITE_EXTERNAL_STORAGE,
             INTERNET,
             ACCESS_NETWORK_STATE,
-            ACCESS_WIFI_STATE,
-            READ_EXTERNAL_STORAGE
+            ACCESS_WIFI_STATE
     };
 
     private static final String TAG = "PrintWSample";
@@ -90,10 +98,13 @@ public class BTConnectActivity extends AppCompatActivity {
         et_macaddress = (EditText)findViewById(R.id.et_macaddress);
         etZpl_to_send = (EditText)findViewById(R.id.et_zpl);
 
+        if(mScrollDownHandler == null)
+            mScrollDownHandler = new Handler(Looper.getMainLooper());
+
         // Verify Permissions
         if (!permissionsGranted()) {
             // Request Permissions
-            ActivityCompat.requestPermissions(BTConnectActivity.this, PERMISSIONS, PERMISSIONS_REQUEST);
+            requestPermissions(PERMISSIONS, PERMISSIONS_REQUEST);
         }
         else
             requestBTPermissions();
@@ -163,8 +174,17 @@ public class BTConnectActivity extends AppCompatActivity {
             }
         });
 
-        if(mScrollDownHandler == null)
-            mScrollDownHandler = new Handler(Looper.getMainLooper());
+        findViewById(R.id.button_openzpl).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent openFileIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                openFileIntent.setType("*/*");
+                openFileIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                openFileIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivityForResult(openFileIntent, OPEN_FILE_REQUEST_CODE);
+            }
+        });
+
         getFromSettings();
     }
 
@@ -184,6 +204,48 @@ public class BTConnectActivity extends AppCompatActivity {
             mScrollDownHandler = null;
         }
         super.onPause();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == OPEN_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK)
+        {
+            Uri uri = null;
+            if (data != null) {
+                uri = data.getData();
+                Log.i(TAG, "Uri: " + uri.toString());
+                InputStream selectedFileInputStream = null;
+                String str = "";
+                StringBuffer buf = new StringBuffer();
+                try {
+                    selectedFileInputStream = getContentResolver().openInputStream(uri);
+                    if(selectedFileInputStream != null)
+                    {
+                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(selectedFileInputStream));
+                        if(bufferedReader != null) {
+                            while ((str = bufferedReader.readLine()) != null) {
+                                buf.append(str + "\n");
+                            }
+                            etZpl_to_send.setText(buf.toString());
+                        }
+                    }
+                } catch (Exception e) {
+                    addLineToResults("Exception while opening file:" + uri);
+                    addLineToResults(e.getMessage());
+                    e.printStackTrace();
+                }
+                finally {
+                    if(selectedFileInputStream != null) {
+                        try {
+                            selectedFileInputStream.close();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void getFromSettings()
@@ -212,6 +274,7 @@ public class BTConnectActivity extends AppCompatActivity {
 
     private void writeToSettings()
     {
+        addLineToResults("Writing data to settings.");
         SharedPreferences sharedpreferences = this.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
         String macAddress = et_macaddress.getText().toString();
@@ -223,6 +286,7 @@ public class BTConnectActivity extends AppCompatActivity {
         editor.putString(Constants.SHARED_PREFERENCES_MACADDRESS, macAddress);
         editor.putString(Constants.SHARED_PREFERENCES_ZPL, zplToSend);
         editor.commit();
+        addLineToResults("Data successfully written to settings.");
     }
 
     private void addLineToResults(final String lineToAdd)
@@ -261,7 +325,8 @@ public class BTConnectActivity extends AppCompatActivity {
         } else {
             // A new line has been added while we were waiting to scroll down
             // reset handler to repost it....
-            mScrollDownHandler.removeCallbacks(mScrollDownRunnable);
+            if(mScrollDownHandler != null)
+                mScrollDownHandler.removeCallbacks(mScrollDownRunnable);
         }
         if(mScrollDownHandler != null)
             mScrollDownHandler.postDelayed(mScrollDownRunnable, 300);

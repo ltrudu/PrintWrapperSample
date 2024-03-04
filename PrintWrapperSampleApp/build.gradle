@@ -43,4 +43,6 @@ dependencies {
     // For dev only
     //implementation project(path: ':PrintWrapper')
 
+    // PrintFile demo
+    implementation 'com.github.ltrudu:CriticalPermissionsHelper:0.4'
 }
