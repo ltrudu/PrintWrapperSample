@@ -272,6 +272,8 @@ public class BTConnectActivity extends AppCompatActivity {
         addLineToResults("**********************************");
         addLineToResults("Starting bluetooth discovery to find requested printer.");
         final Map<String, DiscoveredPrinter> mymap = new HashMap<>();
+
+        // Get Mac address from edittext
         final String editMacAddress = et_macaddress.getText().toString();
         final String macAddress = getCleanedMacAddress(editMacAddress);
         PrinterDiscoveryCallback printerDiscoveryCallback = new PrinterDiscoveryCallback() {
@@ -286,8 +288,8 @@ public class BTConnectActivity extends AppCompatActivity {
 
                 if(address.equalsIgnoreCase(macAddress))
                 {
-                    addLineToResults("Found printer with address:" + editMacAddress);
-                    addLineToResults("Selecting printer for demo.");
+                    addLineToResults("Found requested printer with address:" + editMacAddress);
+                    addLineToResults("Selecting requested printer for demo.");
                     selectedPrinter = printer;
                     selectedPrinterDiscoveryMap = discoveryDataMap;
                     addLineToResults("You are not forced to wait for discovery to finish.");
