@@ -28,21 +28,19 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    namespace 'com.zebra.printwrappersample'
 }
 
 dependencies {
     //implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     // Copy paste in your build.gradle
-    implementation 'com.github.ltrudu:PrintWrapper:V1.4'
+    implementation 'com.github.ltrudu:PrintWrapper:V1.8'
     // For dev only
     //implementation project(path: ':PrintWrapper')
 
     // PrintFile demo
-    implementation 'com.github.ltrudu:CriticalPermissionsHelper:0.4'
+    //implementation 'com.github.ltrudu:CriticalPermissionsHelper:0.4'
 }

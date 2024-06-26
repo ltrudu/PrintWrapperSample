@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,79 +7,13 @@
     tools:context=".BTConnectActivity">
 
     <LinearLayout
-        android:id="@+id/ll_sample"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical">
-
-        <LinearLayout
-        android:id="@+id/ll_actions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.3"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/button_connect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Connect\nPrinter"
-            android:textSize="10sp"
-            android:visibility="visible" />
-
-        <Button
-            android:id="@+id/button_sendzpl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Send\nZPL"
-            android:textSize="10sp"
-            android:visibility="visible" />
-
-            <Button
-                android:id="@+id/button_openzpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Open\nZPL File"
-                android:textSize="10sp"
-                android:visibility="visible" />
-
-            <Button
-                android:id="@+id/button_readsettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Read\nSettings"
-                android:textSize="10sp"
-                android:visibility="visible" />
-
-
-            <Button
-                android:id="@+id/button_writesettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Write\nSettings"
-                android:textSize="10sp"
-                android:visibility="visible" />
-
-    </LinearLayout>
-    </LinearLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/ll_sample"
-        >
-    <LinearLayout
         android:id="@+id/ll_data"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_alignParentBottom="false"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/ll_sample"
+        app:layout_constraintTop_toTopOf="parent">
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -160,15 +94,136 @@
             android:layout_width="fill_parent"
             android:layout_height="200sp"
             android:layout_alignParentStart="true"
-            android:layout_weight="0.5">
+            android:layout_weight="0.5"
+            >
 
             <TextView
                 android:id="@+id/tv_results"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_above="@+id/ll_scan"
-                android:inputType="textMultiLine" />
+                android:inputType="textMultiLine"
+                android:scrollbars="vertical"
+                />
         </ScrollView>
     </LinearLayout>
-    </ScrollView>
-</RelativeLayout>
+
+
+    <LinearLayout
+        android:id="@+id/ll_sample"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/ll_actions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.3"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_connect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Connect\nPrinter"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/button_sendzpl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Send\nZPL"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/button_openzpl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Open\nZPL File"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/button_readsettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Read\nSettings"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+
+            <Button
+                android:id="@+id/button_writesettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Write\nSettings"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_actions2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/button_getallcvs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Get\nAll CVs"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/button_getstatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Get\nStatus"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/button_getlabelcount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Get Label\nCount"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+           <Button
+                android:id="@+id/button_getserialnumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Get Serial\nNumber"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!--ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/ll_sample"
+        -->
+
+    <!--/ScrollView-->
+</androidx.constraintlayout.widget.ConstraintLayout>

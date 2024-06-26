@@ -24,10 +24,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zebra.printwrapper.BluetoothPrinterDiscovery;
+import com.zebra.printwrapper.GetPrinterStatusTask;
 import com.zebra.printwrapper.PrinterDiscoveryDataMapKeys;
 import com.zebra.printwrapper.PrinterDiscoveryCallback;
 
+import com.zebra.printwrapper.PrinterWrapperException;
+import com.zebra.printwrapper.SGDHelper;
 import com.zebra.printwrapper.SendZPLTask;
+import com.zebra.sdk.comm.Connection;
+import com.zebra.sdk.comm.ConnectionException;
+import com.zebra.sdk.printer.PrinterStatus;
+import com.zebra.sdk.printer.ZebraPrinter;
+import com.zebra.sdk.printer.ZebraPrinterFactory;
+import com.zebra.sdk.printer.ZebraPrinterLanguageUnknownException;
 import com.zebra.sdk.printer.discovery.DiscoveredPrinter;
 
 import java.io.BufferedReader;
@@ -85,6 +94,8 @@ public class BTConnectActivity extends AppCompatActivity {
             "^XZ";
 
     private final String m_defaultMacAddress = "AC3FA4CE7931";
+    //private final String m_defaultMacAddress = "48A49385926F";
+    //private final String m_defaultMacAddress = "48A493BAC201";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,40 +132,7 @@ public class BTConnectActivity extends AppCompatActivity {
         findViewById(R.id.button_sendzpl).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String zpltoSend = etZpl_to_send.getText().toString();
-                if (zpltoSend.isEmpty()) {
-                    zpltoSend = m_defaultZpltoSend;
-                    etZpl_to_send.setText(m_defaultZpltoSend);
-                }
-
-                if (selectedPrinter != null) {
-
-                    if(sendZPLTask == null) {
-                        addLineToResults("Sending ZPL to printer.");
-
-                        sendZPLTask = new SendZPLTask(zpltoSend, selectedPrinter, new SendZPLTask.SendZPLTaskCallback() {
-                            @Override
-                            public void onError(SendZPLTask.SendZPLTaskErrors error, String message) {
-                                addLineToResults("Error while sending ZPL to printer: " + error.toString());
-                                addLineToResults("Error message: message");
-                                sendZPLTask = null;
-                            }
-
-                            @Override
-                            public void onSuccess() {
-                                addLineToResults("ZPL sent with success to printer.");
-                                sendZPLTask = null;
-                            }
-                        });
-                        sendZPLTask.executeAsync();
-                        }
-                    else {
-                        addLineToResults("A Send ZPL Task is already running, wait for it to finish.");
-                    }
-                    }
-                    else {
-                    addLineToResults("Please connect to a printer before sending ZPL");
-                }
+                sendZPL();
             }
 
         });
@@ -185,7 +163,191 @@ public class BTConnectActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.button_getallcvs).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getAllCVs();
+            }
+        });
+
+        findViewById(R.id.button_getstatus).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getPrinterStatus();
+            }
+        });
+
+        findViewById(R.id.button_getlabelcount).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getLabelCount();
+            }
+        });
+
+        findViewById(R.id.button_getserialnumber).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                getSerialNumber();
+            }
+        });
+
         getFromSettings();
+    }
+
+    private void getAllCVs() {
+        if(selectedPrinter != null)
+        {
+            try {
+                SGDHelper.GET("allcv", selectedPrinter, new SGDHelper.SGDHelperCallback() {
+                    @Override
+                    public void onMessage(String message) {
+                        addLineToResults("**************************");
+                        addLineToResults("******* GET ALL CVs ******");
+                        addLineToResults(message);
+                        addLineToResults("**************************");
+                    }
+                });
+            } catch (PrinterWrapperException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void getLabelCount() {
+        if (selectedPrinter != null) {
+            try {
+                String user_label_count = SGDHelper.GET("odometer.user_label_count", selectedPrinter,message -> {
+                    addLineToResults("Debug Log: " + message);
+                });
+                addLineToResults("******User Label Count******");
+                addLineToResults("User Label Count :" + user_label_count);
+            } catch (PrinterWrapperException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void getSerialNumber() {
+        if (selectedPrinter != null) {
+            try {
+                String serialNumber = SGDHelper.GET("device.unique_id", selectedPrinter,message -> {
+                    addLineToResults("Debug Log: " + message);
+                });
+                addLineToResults("******Serial Number******");
+                addLineToResults("Device serial number : " + serialNumber);
+
+            } catch (PrinterWrapperException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void getPrinterStatus()
+    {
+        if(selectedPrinter != null)
+        {
+            GetPrinterStatusTask getPrinterStatusTask = new GetPrinterStatusTask();
+            DiscoveredPrinter[] discoveredPrinters = new DiscoveredPrinter[]{ selectedPrinter };
+            getPrinterStatusTask.setGetPrinterStatusTaskCallback(new GetPrinterStatusTask.GetPrinterStatusTaskCallback() {
+                @Override
+                public void onPrinterStatus(PrinterStatus status) {
+                    addLineToResults("***************************");
+                    addLineToResults("Current printer status:");
+                    if (status.isReadyToPrint) {
+                        addLineToResults("Ready To Print");
+                    } else if (status.isPaused) {
+                        addLineToResults("Cannot Print because the printer is paused.");
+                    } else if (status.isHeadOpen) {
+                        addLineToResults("Cannot Print because the printer head is open.");
+                    } else if (status.isPaperOut) {
+                        addLineToResults("Cannot Print because the paper is out.");
+                    } else {
+                        addLineToResults("Cannot Print.");
+                    }
+                }
+            });
+            getPrinterStatusTask.executeAsync(discoveredPrinters);
+
+            /*
+            addLineToResults("***************************");
+            addLineToResults("Current printer status:");
+
+            if(selectedPrinter.getConnection() != null ) {
+                Connection connection = selectedPrinter.getConnection();
+                if(connection.isConnected() == false) {
+                    try {
+                        connection.open();
+                        ZebraPrinter printer = ZebraPrinterFactory.getInstance(connection);
+                        if(printer != null)
+                        {
+                            PrinterStatus printerStatus = printer.getCurrentStatus();
+                            addLineToResults("***************************");
+                            addLineToResults("Current printer status:");
+                            if (printerStatus.isReadyToPrint) {
+                                addLineToResults("Ready To Print");
+                            } else if (printerStatus.isPaused) {
+                                addLineToResults("Cannot Print because the printer is paused.");
+                            } else if (printerStatus.isHeadOpen) {
+                                addLineToResults("Cannot Print because the printer head is open.");
+                            } else if (printerStatus.isPaperOut) {
+                                addLineToResults("Cannot Print because the paper is out.");
+                            } else {
+                                addLineToResults("Cannot Print.");
+                            }
+                        }
+                    } catch (ConnectionException e) {
+                        throw new RuntimeException(e);
+                    } catch (ZebraPrinterLanguageUnknownException e) {
+                        throw new RuntimeException(e);
+                    }
+                    finally {
+                        try {
+                            connection.close();
+                        } catch (ConnectionException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+             */
+        }
+    }
+
+    private void sendZPL() {
+        String zpltoSend = etZpl_to_send.getText().toString();
+        if (zpltoSend.isEmpty()) {
+            zpltoSend = m_defaultZpltoSend;
+            etZpl_to_send.setText(m_defaultZpltoSend);
+        }
+
+        if (selectedPrinter != null) {
+
+            if(sendZPLTask == null) {
+                addLineToResults("Sending ZPL to printer.");
+
+                sendZPLTask = new SendZPLTask(zpltoSend, selectedPrinter, new SendZPLTask.SendZPLTaskCallback() {
+                    @Override
+                    public void onError(SendZPLTask.SendZPLTaskErrors error, String message) {
+                        addLineToResults("Error while sending ZPL to printer: " + error.toString());
+                        addLineToResults("Error message: message");
+                        sendZPLTask = null;
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        addLineToResults("ZPL sent with success to printer.");
+                        sendZPLTask = null;
+                    }
+                });
+                sendZPLTask.executeAsync();
+                }
+            else {
+                addLineToResults("A Send ZPL Task is already running, wait for it to finish.");
+            }
+            }
+            else {
+            addLineToResults("Please connect to a printer before sending ZPL");
+        }
     }
 
     @Override
