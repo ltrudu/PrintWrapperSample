@@ -6,12 +6,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     defaultConfig {
         applicationId "com.zebra.printwrappersample"
-        minSdkVersion 30
-        targetSdkVersion 33
+        minSdkVersion 33
+        targetSdkVersion 34
         versionCode 5
         versionName "1.5"
 
@@ -33,11 +33,12 @@ android {
 
 dependencies {
     //implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'androidx.appcompat:appcompat-resources:1.4.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     // Copy paste in your build.gradle
-    implementation 'com.github.ltrudu:PrintWrapper:V1.8'
+    implementation 'com.github.ltrudu:PrintWrapper:V1.10'
     // For dev only
     //implementation project(path: ':PrintWrapper')
 

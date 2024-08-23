@@ -93,7 +93,8 @@ public class BTConnectActivity extends AppCompatActivity {
             "^FO40,160^BY2,2.0^BCN,100,Y,N,N,N^FD<PART,-1>^FS\n" +
             "^XZ";
 
-    private final String m_defaultMacAddress = "AC3FA4CE7931";
+    private final String m_defaultMacAddress = "48A493EF6B7B";//"8CD54A10AF43"; //D4J242208881
+    //private final String m_defaultMacAddress = "AC3FA4CE7931";
     //private final String m_defaultMacAddress = "48A49385926F";
     //private final String m_defaultMacAddress = "48A493BAC201";
 
