@@ -32,13 +32,13 @@ android {
 }
 
 dependencies {
-    //implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation fileTree(dir: "libs", include: ["*.jar", "*.aar"])
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'androidx.appcompat:appcompat-resources:1.4.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     // Copy paste in your build.gradle
-    implementation 'com.github.ltrudu:PrintWrapper:V1.10'
+    //implementation 'com.github.ltrudu:PrintWrapper:V1.17'
     // For dev only
     //implementation project(path: ':PrintWrapper')
 
