@@ -199,7 +199,7 @@ public class BTConnectActivity extends AppCompatActivity {
         if(selectedPrinter != null)
         {
             try {
-                SGDHelper.GET("allcv", selectedPrinter, new SGDHelper.SGDHelperCallback() {
+                SGDHelper.GET("allcv", selectedPrinter, 15000, 15000, new SGDHelper.SGDHelperCallback() {
                     @Override
                     public void onMessage(String message) {
                         addLineToResults("**************************");
