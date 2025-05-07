@@ -217,6 +217,33 @@
                 android:visibility="visible" />
 
         </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_actions3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.3"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/connecttcp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="10sp"
+            android:text="TCP\nConnect" />
+
+        <Button
+            android:id="@+id/bruteforcebluetooth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="10sp"
+            android:text="BruteForce\nBluetooth" />
+
+
+    </LinearLayout>
+
     </LinearLayout>
 
     <!--ScrollView

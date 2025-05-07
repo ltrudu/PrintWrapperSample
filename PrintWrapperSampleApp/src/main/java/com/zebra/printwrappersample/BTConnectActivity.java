@@ -31,8 +31,10 @@ import com.zebra.printwrapper.PrinterDiscoveryCallback;
 import com.zebra.printwrapper.PrinterWrapperException;
 import com.zebra.printwrapper.SGDHelper;
 import com.zebra.printwrapper.SendZPLTask;
+import com.zebra.sdk.comm.BluetoothConnection;
 import com.zebra.sdk.comm.Connection;
 import com.zebra.sdk.comm.ConnectionException;
+import com.zebra.sdk.comm.TcpConnection;
 import com.zebra.sdk.printer.PrinterStatus;
 import com.zebra.sdk.printer.ZebraPrinter;
 import com.zebra.sdk.printer.ZebraPrinterFactory;
@@ -44,6 +46,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,9 +97,9 @@ public class BTConnectActivity extends AppCompatActivity {
             "^XZ";
 
     //private final String m_defaultMacAddress = //"48A493EF6B7B";//"8CD54A10AF43"; //D4J242208881
-    private final String m_defaultMacAddress = "AC3FA4CE7931";
-    //private final String m_defaultMacAddress = "48A49385926F";
-    //private final String m_defaultMacAddress = "48A493BAC201";
+    //private final String m_defaultMacAddress = "AC3FA4CE7931";
+    private final String m_defaultMacAddress = "00074DBCE91C";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,7 +131,19 @@ public class BTConnectActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.connecttcp).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                connectTCPIP();
+            }
+        });
 
+        findViewById(R.id.bruteforcebluetooth).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bruteForceBluetooth();
+            }
+        });
 
         findViewById(R.id.button_sendzpl).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -494,6 +509,66 @@ public class BTConnectActivity extends AppCompatActivity {
         if(mScrollDownHandler != null)
             mScrollDownHandler.postDelayed(mScrollDownRunnable, 300);
     }
+
+    private void connectTCPIP()
+    {
+        //Connection connection = new TcpConnection("192.168.1.139", TcpConnection.DEFAULT_ZPL_TCP_PORT, 2000, 500);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                addLineToResults("Initiating TcpIP connexion on not working IP");
+                Date initDate = new Date();
+                Connection connection = new TcpConnection("192.168.1.140", TcpConnection.DEFAULT_ZPL_TCP_PORT, 500, 500);
+                try {
+                    connection.open();
+                } catch (ConnectionException e) {
+                    addLineToResults("Exception trying to connect TcpIP:" + e.getMessage());
+                }
+                Date endDate = new Date();
+                long differenceInMillis = endDate.getTime() - initDate.getTime();
+                addLineToResults("Connection took:" + differenceInMillis + "ms");
+            }
+        }).start();
+    }
+
+    private void bruteForceBluetooth()
+    {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                addLineToResults("Initiating bluetooth connexion.");
+                //BluetoothConnection btConnect = new BluetoothConnection("AC:3F:A4:CE:79:31", 2000, 2000);
+                BluetoothConnection btConnect = new BluetoothConnection("00:07:4D:BC:E9:1C", 2000, 2000);
+                for(int i = 0; i < 20; i++)
+                {
+                    try {
+                        addLineToResults("Tryout number:" + i);
+                        btConnect.open();
+                        Thread.sleep(500);
+                        btConnect.close();
+                        Thread.sleep(500);
+                        addLineToResults("Tryout " + i + " succeeded.");
+                    } catch (Exception e) {
+                        addLineToResults("Exception trying to connect:" + e.getMessage());
+                        addLineToResults("Exception occured after:" + i + " tryouts.");
+                        break;
+                    }
+                }
+                try {
+                    addLineToResults("Re Connecting and sending ZPL to Printer");
+                    btConnect.open();
+                    byte[] zplAsByte = m_defaultZpltoSend.getBytes();
+                    btConnect.write(zplAsByte);
+                    btConnect.close();
+                    addLineToResults("ZPL Sent with success.");
+                } catch (ConnectionException e) {
+                    addLineToResults("Exception trying to connect:" + e.getMessage());
+                }
+            }
+        }).start();
+
+    }
+
 
     private void discoverBluetoothPrinters()
     {
